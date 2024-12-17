@@ -1,9 +1,10 @@
 {
   "name": "telegram-todo-bot",
   "version": "1.0.0",
+  "type": "module",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node src/bot.ts",
+    "start": "tsx src/bot.ts",
     "dev": "nodemon --exec ts-node src/bot.ts",
     "lint": "npx eslint src/**/*.{ts,js}",
     "lint:fix": "npx eslint src/**/*.{ts,js} --fix"
@@ -25,6 +26,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
+    "@types/sequelize": "^4.28.20",
     "@typescript-eslint/eslint-plugin": "^8.18.1",
     "@typescript-eslint/parser": "^8.18.1",
     "eslint": "^9.17.0",
@@ -34,6 +36,7 @@
     "nodemon": "^3.1.9",
     "prettier": "^3.4.2",
     "ts-node": "^10.9.2",
+    "tsx": "^4.19.2",
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.18.1",
     "vitest": "^2.1.8"
