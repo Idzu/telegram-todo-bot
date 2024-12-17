@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "es2016",     
+
+    /* Modules */
+    "module": "commonjs",      
+    "forceConsistentCasingInFileNames": true,
+
+    /* Type Checking */
+    "strict": true,                                      
+
+    "skipLibCheck": true
+  }
+}
