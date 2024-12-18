@@ -28,3 +28,13 @@ export const getCategoriesForUser = async (userId: number) => {
 export const deleteCategory = async (id: number) => {
   return await Category.destroy({ where: { id } });
 };
+
+/**
+ * Редактировать категорию
+ * @param userId
+ * @param name
+ * @returns
+ */
+export const editCategory = async (id: number, name: string) => {
+  return await Category.update({ name }, { where: { id } });
+};

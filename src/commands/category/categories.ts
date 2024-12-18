@@ -15,7 +15,7 @@ export const renderCategoriesWithKeyboard = async (ctx: Context, categories: { i
   // Вывод категорий в формате название, кнопка удаления
   const keyboard = new InlineKeyboard();
   categories.forEach((category) => {
-    keyboard.text(category.name, `noop`).text('❌', `delete_${category.id}`).row();
+    keyboard.text(category.name, `noop`).text('✏️', `edit_${category.id}`).text('❌', `delete_${category.id}`).row();
   });
 
   if (ctx.callbackQuery) {

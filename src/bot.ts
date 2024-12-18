@@ -11,6 +11,8 @@ import { tasksCommand } from './commands/task/tasks';
 import { addCategoryCommand } from './commands/category/addCategory';
 import { listCategories } from './commands/category/categories';
 import { deleteUserCategory } from './commands/category/deleteCategory';
+import { editUserCategory, handleTextInputForEdit } from './commands/category/editCategory';
+import { editCategoryState } from './utils/editCategoryState';
 
 // Settings bot
 const bot = new Bot(process.env.BOT_TOKEN!);
@@ -23,6 +25,19 @@ bot.command('tasks', tasksCommand);
 bot.command('addcategory', addCategoryCommand);
 bot.command('listcategory', listCategories);
 bot.callbackQuery(/delete_\d+/, deleteUserCategory);
+bot.callbackQuery(/edit_\d+/, editUserCategory);
+
+// Обработка текстового ввода для редактирования категорий
+bot.on('message', async (ctx) => {
+  const userId = ctx.from?.id;
+  // Если пользователь не в процессе редактирования, игнорируем его ввод
+  if (!userId || !editCategoryState.has(userId)) {
+    return;
+  }
+
+  // Если пользователь в процессе редактирования, обрабатываем ввод
+  await handleTextInputForEdit(ctx);
+});
 
 // Basic command start
 bot.command('start', (ctx) => {
