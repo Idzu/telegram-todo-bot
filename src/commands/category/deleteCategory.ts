@@ -1,6 +1,6 @@
 import { Context } from 'grammy';
 import { deleteCategory, getCategoriesForUser } from '../../services/categoryService';
-import { renderCategoriesWithKeyboard } from './categories';
+import { renderCategoriesWithKeyboard } from '../../keyboards/categoryKeyboard';
 
 /**
  * Удаление категории и обновление списка

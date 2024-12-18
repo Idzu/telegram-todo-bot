@@ -1,8 +1,8 @@
 import { Context } from 'grammy';
 import logger from '../../utils/logger';
 import { editCategory, getCategoriesForUser } from '../../services/categoryService';
-import { renderCategoriesWithKeyboard } from './categories';
 import { editCategoryState } from '../../utils/editCategoryState';
+import { renderCategoriesWithKeyboard } from '../../keyboards/categoryKeyboard';
 
 /**
  * Обработка команды редактирования категории
@@ -60,9 +60,6 @@ export const handleTextInputForEdit = async (ctx: Context) => {
 
     // Обновляем категорию в базе данных
     await editCategory(categoryId, newName);
-
-    // Уведомляем пользователя об успешном редактировании
-    ctx.reply('Category has been updated.');
 
     // Удаляем состояние редактирования
     editCategoryState.delete(userId);
