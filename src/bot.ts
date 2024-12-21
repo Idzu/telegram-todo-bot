@@ -14,13 +14,21 @@ import { deleteUserCategory } from './commands/category/deleteCategory';
 import { editUserCategory, handleTextInputForEdit } from './commands/category/editCategory';
 import { editCategoryState } from './utils/editCategoryState';
 
+// Output text
+import { outputStartText } from './commands/start';
+import { outputSettingsText } from './commands/settings';
+import { keyboardCommands } from './keyboards/mainKeyboard';
+
 // Settings bot
 const bot = new Bot(process.env.BOT_TOKEN!);
 
 // Register commands
+// Basic command start
+bot.command('start', outputStartText);
+bot.hears(keyboardCommands.settings, outputSettingsText);
 // Tasks
-bot.command('addtask', addTaskCommand);
-bot.command('tasks', tasksCommand);
+bot.hears(keyboardCommands.addTask, addTaskCommand);
+bot.hears(keyboardCommands.tasks, tasksCommand);
 // Category
 bot.command('addcategory', addCategoryCommand);
 bot.command('listcategory', listCategories);
@@ -37,12 +45,6 @@ bot.on('message', async (ctx) => {
 
   // Если пользователь в процессе редактирования, обрабатываем ввод
   await handleTextInputForEdit(ctx);
-});
-
-// Basic command start
-bot.command('start', (ctx) => {
-  logger.info(`User ${ctx.from?.id} started the bot`);
-  ctx.reply('Welcome!');
 });
 
 // Bot error message
