@@ -5,7 +5,6 @@ class Task extends Model {
   declare id: number;
   declare userId: number;
   declare text: string;
-  declare date: string;
   declare completed: boolean;
 }
 
@@ -22,10 +21,6 @@ Task.init(
     },
     text: {
       type: DataTypes.STRING(255),
-      allowNull: false,
-    },
-    date: {
-      type: DataTypes.DATEONLY,
       allowNull: false,
     },
     completed: {

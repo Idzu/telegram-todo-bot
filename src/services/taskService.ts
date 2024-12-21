@@ -1,5 +1,15 @@
 import Task from '../models/task';
 
+export interface Tasks {
+  id: number;
+  userId: number;
+  text: string;
+  completed: number;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string;
+}
+
 /**
  * Добавление задачи
  * @param userId
@@ -17,8 +27,8 @@ export const addTask = async (userId: number, text: string, date: string) => {
  * @param date
  * @returns
  */
-export const getTasksForUser = async (userId: number, date: string) => {
-  return await Task.findAll({ where: { userId, date } });
+export const getTasksForUser = async (userId: number) => {
+  return await Task.findAll({ where: { userId } });
 };
 
 /**
