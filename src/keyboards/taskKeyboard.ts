@@ -4,6 +4,7 @@ export const taskKeyboardsComands = {
   addTodayTask: 'Add a task for today',
   addTomorrowTask: 'Add a task for tomorrow',
   addFutureTask: 'Add a task for the future',
+  back: 'Back',
 } as const;
 
 /**
@@ -16,7 +17,9 @@ export const renderTaskKeyboard = async () => {
     .row()
     .text(taskKeyboardsComands.addTomorrowTask)
     .row()
-    .text(taskKeyboardsComands.addFutureTask);
+    .text(taskKeyboardsComands.addFutureTask)
+    .row()
+    .text(taskKeyboardsComands.back);
 
   return taskKeyboard;
 };
