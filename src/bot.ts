@@ -4,7 +4,15 @@ import logger from './utils/logger';
 import db from './utils/db';
 
 // Tasks
-import { addTaskCommand, addTodayTask, addTomorrowTask, handleTodayTaskInput, handleTomorrowTaskInput } from './commands/task/addTask';
+import {
+  addFutureTask,
+  addTaskCommand,
+  addTodayTask,
+  addTomorrowTask,
+  handleFutureTaskInput,
+  handleTodayTaskInput,
+  handleTomorrowTaskInput,
+} from './commands/task/addTask';
 import { tasksCommand } from './commands/task/tasks';
 
 // Category
@@ -32,6 +40,7 @@ bot.hears(keyboardCommands.settings, outputSettingsText);
 bot.hears(keyboardCommands.addTask, addTaskCommand);
 bot.hears(taskKeyboardsComands.addTodayTask, addTodayTask);
 bot.hears(taskKeyboardsComands.addTomorrowTask, addTomorrowTask);
+bot.hears(taskKeyboardsComands.addFutureTask, addFutureTask);
 bot.hears(keyboardCommands.tasks, tasksCommand);
 // Category
 bot.command('addcategory', addCategoryCommand);
@@ -56,6 +65,15 @@ bot.on('message', async (ctx) => {
   // Обработка задачи на завтра
   if (taskStatus === 'waitingTomorrowTask' && ctx.message?.text) {
     await handleTomorrowTaskInput(ctx);
+    return;
+  }
+  // Обработка задачи на определенное время
+  if (taskStatus === 'waitingFutureTaskDate' && ctx.message?.text) {
+    await addFutureTask(ctx, 'text');
+    return;
+  }
+  if (taskStatus === 'waitingFutureTaskText' && ctx.message?.text) {
+    await handleFutureTaskInput(ctx);
     return;
   }
 
