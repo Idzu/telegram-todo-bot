@@ -4,7 +4,7 @@ import logger from './utils/logger';
 import db from './utils/db';
 
 // Tasks
-import { addTaskCommand, addTodayTask, handleTodayTaskInput } from './commands/task/addTask';
+import { addTaskCommand, addTodayTask, addTomorrowTask, handleTodayTaskInput, handleTomorrowTaskInput } from './commands/task/addTask';
 import { tasksCommand } from './commands/task/tasks';
 
 // Category
@@ -31,6 +31,7 @@ bot.hears(keyboardCommands.settings, outputSettingsText);
 // Tasks
 bot.hears(keyboardCommands.addTask, addTaskCommand);
 bot.hears(taskKeyboardsComands.addTodayTask, addTodayTask);
+bot.hears(taskKeyboardsComands.addTomorrowTask, addTomorrowTask);
 bot.hears(keyboardCommands.tasks, tasksCommand);
 // Category
 bot.command('addcategory', addCategoryCommand);
@@ -47,9 +48,14 @@ bot.on('message', async (ctx) => {
   const taskStatus = taskState.get(userId);
   const categoryStatus = editCategoryState.has(userId);
 
-  // Обработка состояния задачи
+  // Обработка задачи на сегодня
   if (taskStatus === 'waitingTodayTask' && ctx.message?.text) {
     await handleTodayTaskInput(ctx);
+    return;
+  }
+  // Обработка задачи на завтра
+  if (taskStatus === 'waitingTomorrowTask' && ctx.message?.text) {
+    await handleTomorrowTaskInput(ctx);
     return;
   }
 

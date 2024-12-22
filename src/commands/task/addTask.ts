@@ -47,3 +47,33 @@ export const handleTodayTaskInput = async (ctx: Context) => {
     await ctx.reply('Произошла ошибка при добавлении задачи');
   }
 };
+
+export const addTomorrowTask = async (ctx: Context) => {
+  try {
+    if (!ctx.from) {
+      return ctx.reply('Unable to identify the user.');
+    }
+    await ctx.reply('Введите текст задачи на завтра:');
+    taskState.set(ctx.from.id, 'waitingTomorrowTask');
+  } catch (error) {
+    logger.error('Error in addTomorrowTask:', error);
+    await ctx.reply('Произошла ошибка при добавлении задачи');
+  }
+};
+
+export const handleTomorrowTaskInput = async (ctx: Context) => {
+  try {
+    if (!ctx.from?.id || !ctx.message?.text) return;
+
+    const today = new Date();
+    const tomorrow = new Date();
+    tomorrow.setDate(today.getDate() + 1);
+
+    await addTask(ctx.from.id, ctx.message.text, tomorrow);
+    await ctx.reply('Задача добавлена!');
+    taskState.delete(ctx.from.id);
+  } catch (error) {
+    logger.error('Error handling today task input:', error);
+    await ctx.reply('Произошла ошибка при добавлении задачи');
+  }
+};

@@ -18,7 +18,7 @@ export interface Tasks {
  * @returns
  */
 export const addTask = async (userId: number, text: string, date: string) => {
-  return await Task.create({ userId, text, date });
+  return await Task.create({ userId, text, createdAt: date });
 };
 
 /**
