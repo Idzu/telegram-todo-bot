@@ -1,7 +1,7 @@
 import { Context } from 'grammy';
 import logger from '../../utils/logger';
 import { editCategory, getCategoriesForUser } from '../../services/categoryService';
-import { editCategoryState } from '../../utils/editCategoryState';
+import { editCategoryState } from '../../state/editCategoryState';
 import { renderCategoriesWithKeyboard } from '../../keyboards/categoryKeyboard';
 
 /**
