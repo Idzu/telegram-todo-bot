@@ -18,9 +18,13 @@ import { editCategoryState } from './utils/editCategoryState';
 import { outputStartText } from './commands/start';
 import { outputSettingsText } from './commands/settings';
 import { keyboardCommands } from './keyboards/mainKeyboard';
+import { mainKeyboardMiddleware } from './middlewares/mainKeyobard';
 
 // Settings bot
 const bot = new Bot(process.env.BOT_TOKEN!);
+
+// Middlewares
+bot.use(mainKeyboardMiddleware);
 
 // Register commands
 // Basic command start
