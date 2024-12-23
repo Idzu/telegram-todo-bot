@@ -128,7 +128,7 @@ export const addRecurringTask = async (ctx: Context) => {
       return ctx.reply('Unable to identify the user.');
     }
 
-    await ctx.reply('Введите текст ежедневной задачи и выберите категорию:');
+    await ctx.reply('Введите текст ежедневной задачи');
     taskState.set(ctx.from.id, 'waitingRecurringTask');
   } catch (error) {
     logger.error('Error in addRecurringTask:', error);

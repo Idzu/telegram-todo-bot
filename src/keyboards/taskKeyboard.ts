@@ -5,6 +5,7 @@ export const taskKeyboardsComands = {
   addTomorrowTask: 'Add a task for tomorrow',
   addFutureTask: 'Add a task for the future',
   addRecurringTask: 'Add daily recurring task',
+  back: 'Back to menu',
 } as const;
 
 /**
@@ -18,6 +19,8 @@ export const renderTaskKeyboard = async () => {
     .text(taskKeyboardsComands.addTomorrowTask)
     .row()
     .text(taskKeyboardsComands.addFutureTask)
+    .row()
+    .text(taskKeyboardsComands.addRecurringTask)
     .row()
     .text(taskKeyboardsComands.back);
 
