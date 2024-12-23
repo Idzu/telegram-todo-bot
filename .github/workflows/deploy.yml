@@ -14,13 +14,13 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Install SSH key 
-        uses: webfactory/ssh-agent@v0.8.1
+        uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Deploy to server
         run: |
-          ssh -o StrictHostKeyChecking=no -p PORT root@78f9ea536125.vps.myjino.ru << 'EOF'
+          ssh -o StrictHostKeyChecking=no -p 49474 root@78f9ea536125.vps.myjino.ru << 'EOF'
           cd /var/www/telegram-todo-bot || exit
           git pull
           npm install
