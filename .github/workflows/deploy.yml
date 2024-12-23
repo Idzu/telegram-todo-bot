@@ -20,9 +20,9 @@ jobs:
 
       - name: Deploy to server
         run: |
-          ssh -o StrictHostKeyChecking=no -p 49474 root@78f9ea536125.vps.myjino.ru << 'EOF'
-          cd /var/www/telegram-todo-bot || exit
-          git pull
+          sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no root@78f9ea536125.vps.myjino.ru << 'EOF' 
+          cd /var/www/telegram-todo-bot
+          git pull origin main
           npm install
           pm2 restart telegram-todo-bot
-          EOF                                                                                          
+          EOF                                                                                  
