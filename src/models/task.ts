@@ -6,6 +6,7 @@ class Task extends Model {
   declare userId: number;
   declare text: string;
   declare completed: boolean;
+  declare isRecurring: boolean;
 }
 
 Task.init(
@@ -24,6 +25,11 @@ Task.init(
       allowNull: false,
     },
     completed: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+    isRecurring: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false,

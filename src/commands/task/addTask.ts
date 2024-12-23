@@ -1,9 +1,10 @@
-import { Context } from 'grammy';
+import { Context, InlineKeyboard } from 'grammy';
 import { addTask } from '../../services/taskService';
 import { renderTaskKeyboard } from '../../keyboards/taskKeyboard';
 import logger from '../../utils/logger';
 import { taskDateState, taskState } from '../../state/taskState';
 import { isValidDateFormat } from '../../utils/isValidDateFormat';
+import { getCategoriesForUser } from '../../services/categoryService';
 
 /**
  * Добавление задачи, в формате text, date, userID
@@ -117,6 +118,33 @@ export const handleFutureTaskInput = async (ctx: Context) => {
     taskDateState.delete(ctx.from.id);
   } catch (error) {
     logger.error('Error handling future task input:', error);
+    await ctx.reply('Произошла ошибка при добавлении задачи');
+  }
+};
+
+export const addRecurringTask = async (ctx: Context) => {
+  try {
+    if (!ctx.from) {
+      return ctx.reply('Unable to identify the user.');
+    }
+
+    await ctx.reply('Введите текст ежедневной задачи и выберите категорию:');
+    taskState.set(ctx.from.id, 'waitingRecurringTask');
+  } catch (error) {
+    logger.error('Error in addRecurringTask:', error);
+    await ctx.reply('Произошла ошибка при добавлении задачи');
+  }
+};
+
+export const handleRecurringTaskInput = async (ctx: Context) => {
+  try {
+    if (!ctx.from?.id || !ctx.message?.text) return;
+
+    await addTask(ctx.from.id, ctx.message.text, new Date(), true);
+    await ctx.reply('Ежедневная задача добавлена!');
+    taskState.delete(ctx.from.id);
+  } catch (error) {
+    logger.error('Error handling recurring task input:', error);
     await ctx.reply('Произошла ошибка при добавлении задачи');
   }
 };

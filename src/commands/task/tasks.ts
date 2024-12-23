@@ -20,7 +20,7 @@ export const tasksCommand = async (ctx: Context) => {
 
   const todayTasks = tasks.filter((task) => {
     const taskDate = new Date(task.createdAt);
-    return taskDate >= startOfDay && taskDate <= endOfDay;
+    return (taskDate >= startOfDay && taskDate <= endOfDay) || task.isRecurring;
   });
 
   const futureTasks = tasks.filter((task) => {
@@ -30,7 +30,7 @@ export const tasksCommand = async (ctx: Context) => {
 
   const overdueTasks = tasks.filter((task) => {
     const taskDate = new Date(task.createdAt);
-    return taskDate < startOfDay && !task.completed;
+    return taskDate < startOfDay && !task.completed && !task.isRecurring;
   });
 
   const taskListToday = todayTasks.length ? todayTasks.map((t, i) => `${i + 1}. ${t.text} [${t.completed ? '✅' : '❌'}]`).join('\n') : 'No tasks for today.';

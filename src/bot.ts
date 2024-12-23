@@ -4,7 +4,7 @@ import logger from './utils/logger';
 import db from './utils/db';
 
 // Tasks
-import { addFutureTask, addTaskCommand, addTodayTask, addTomorrowTask } from './commands/task/addTask';
+import { addFutureTask, addTaskCommand, addTodayTask, addTomorrowTask, addRecurringTask } from './commands/task/addTask';
 import { tasksCommand } from './commands/task/tasks';
 
 // Category
@@ -33,6 +33,7 @@ bot.hears(keyboardCommands.addTask, addTaskCommand);
 bot.hears(taskKeyboardsComands.addTodayTask, addTodayTask);
 bot.hears(taskKeyboardsComands.addTomorrowTask, addTomorrowTask);
 bot.hears(taskKeyboardsComands.addFutureTask, (ctx) => addFutureTask(ctx, ''));
+bot.hears(taskKeyboardsComands.addRecurringTask, addRecurringTask);
 bot.hears(taskKeyboardsComands.back, handleBackButton);
 bot.hears(keyboardCommands.tasks, tasksCommand);
 // Category

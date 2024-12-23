@@ -1,7 +1,7 @@
 import { Context } from 'grammy';
 import { taskState } from '../state/taskState';
 import { editCategoryState } from '../state/editCategoryState';
-import { handleTodayTaskInput, handleTomorrowTaskInput, handleFutureTaskInput, addFutureTask } from '../commands/task/addTask';
+import { handleTodayTaskInput, handleTomorrowTaskInput, handleFutureTaskInput, addFutureTask, handleRecurringTaskInput } from '../commands/task/addTask';
 import { handleTextInputForEdit } from '../commands/category/editCategory';
 import logger from '../utils/logger';
 
@@ -14,23 +14,31 @@ export const handleMessage = async (ctx: Context) => {
   const categoryStatus = editCategoryState.has(userId);
 
   try {
+    if (!ctx.message?.text) return;
+
     // Обработка задачи на сегодня
-    if (taskStatus === 'waitingTodayTask' && ctx.message?.text) {
+    if (taskStatus === 'waitingTodayTask') {
       await handleTodayTaskInput(ctx);
       return;
     }
     // Обработка задачи на завтра
-    if (taskStatus === 'waitingTomorrowTask' && ctx.message?.text) {
+    if (taskStatus === 'waitingTomorrowTask') {
       await handleTomorrowTaskInput(ctx);
       return;
     }
     // Обработка задачи на определенное время
-    if (taskStatus === 'waitingFutureTaskDate' && ctx.message?.text) {
+    if (taskStatus === 'waitingFutureTaskDate') {
       await addFutureTask(ctx, 'text');
       return;
     }
-    if (taskStatus === 'waitingFutureTaskText' && ctx.message?.text) {
+    if (taskStatus === 'waitingFutureTaskText') {
       await handleFutureTaskInput(ctx);
+      return;
+    }
+
+    // Добавляем обработчик для повторяющихся задач
+    if (taskStatus === 'waitingRecurringTask') {
+      await handleRecurringTaskInput(ctx);
       return;
     }
 
