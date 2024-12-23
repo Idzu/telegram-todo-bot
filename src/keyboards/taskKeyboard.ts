@@ -4,7 +4,7 @@ export const taskKeyboardsComands = {
   addTodayTask: 'Add a task for today',
   addTomorrowTask: 'Add a task for tomorrow',
   addFutureTask: 'Add a task for the future',
-  back: 'Back',
+  addRecurringTask: 'Add daily recurring task',
 } as const;
 
 /**
