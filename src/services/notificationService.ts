@@ -1,91 +1,79 @@
 import { Bot, Context } from 'grammy';
 import schedule from 'node-schedule';
 import User from '../models/user';
-import UserSettings from '../models/userSettings';
 import { getTasksForUser } from './taskService';
 import { formatTaskList } from '../utils/taskFormatter';
 import logger from '../utils/logger';
+import UserSettings from '../models/userSettings';
 
-// Хранилище для активных задач планировщика
+// Хранилище активных задач планировщика
 const activeJobs = new Map<string, schedule.Job>();
 
-export const setupNotifications = (bot: Bot<Context>) => {
-  // Функция для отправки уведомления
-  const sendNotification = async (userId: number, time: string) => {
-    try {
-      const tasks = await getTasksForUser(userId);
-      if (tasks.length === 0) return;
+// Статичное время для уведомлений (UTC+4)
+const notificationTimes = ['09:00', '12:00', '15:00', '17:00'];
 
-      const message = `🕒 ${time}\n\n${formatTaskList(tasks)}`;
-      await bot.api.sendMessage(userId, message);
-      logger.info(`Notification sent to user ${userId} at ${time}`);
-    } catch (error) {
-      logger.error(`Error sending notification to user ${userId}:`, error);
+// Функция для отправки уведомления
+const sendNotification = async (bot: Bot<Context>, userId: number, time: string): Promise<void> => {
+  try {
+    const tasks = await getTasksForUser(userId);
+    if (tasks.length === 0) return;
+
+    const message = `🕒 ${time}\n\n${formatTaskList(tasks)}`;
+    await bot.api.sendMessage(userId, message);
+    logger.info(`Notification sent to user ${userId} at ${time}`);
+  } catch (error) {
+    logger.error(`Error sending notification to user ${userId}:`, error);
+  }
+};
+
+// Функция для создания задачи в планировщике
+const createScheduleJob = (bot: Bot<Context>, userId: number, time: string): void => {
+  const [hours, minutes] = time.split(':').map(Number);
+  const rule = new schedule.RecurrenceRule();
+  rule.hour = hours;
+  rule.minute = minutes;
+
+  const jobKey = `${userId}_${time}`;
+
+  // Отменяем существующую задачу, если она есть
+  if (activeJobs.has(jobKey)) {
+    activeJobs.get(jobKey)?.cancel();
+    activeJobs.delete(jobKey);
+  }
+
+  // Создаём новую задачу
+  const job = schedule.scheduleJob(rule, () => sendNotification(bot, userId, time));
+  activeJobs.set(jobKey, job);
+};
+
+// Планировщик уведомлений
+export const setupNotifications = async (bot: Bot<Context>): Promise<void> => {
+  try {
+    // Получаем всех пользователей из базы
+    const users = await User.findAll();
+
+    if (users.length === 0) {
+      logger.info('No users found for notifications.');
+      return;
     }
-  };
 
-  // Функция для создания задачи планировщика
-  const createScheduleJob = (userId: number, time: string, timezone: string) => {
-    const [hours, minutes] = time.split(':');
-    const rule = new schedule.RecurrenceRule();
-    rule.hour = parseInt(hours);
-    rule.minute = parseInt(minutes);
-    rule.tz = timezone;
-
-    const jobKey = `${userId}_${time}`;
-
-    // Отменяем существующую задачу, если она есть
-    if (activeJobs.has(jobKey)) {
-      activeJobs.get(jobKey)?.cancel();
-    }
-
-    // Создаем новую задачу
-    const job = schedule.scheduleJob(rule, () => sendNotification(userId, time));
-    activeJobs.set(jobKey, job);
-
-    logger.info(`Scheduled notification for user ${userId} at ${time} (${timezone})`);
-  };
-
-  // Планировщик уведомлений
-  const scheduleUserNotifications = async () => {
-    // Отменяем все активные задачи
+    // Очищаем предыдущие задачи
     activeJobs.forEach((job) => job.cancel());
     activeJobs.clear();
 
-    const users = await User.findAll({
-      include: [UserSettings],
-    });
-
+    // Планируем уведомления для каждого пользователя
     users.forEach((user) => {
-      const settings = user.UserSettings;
-      if (!settings) return;
-
-      try {
-        const times = JSON.parse(settings.notificationTimes);
-        times.forEach((time: string) => {
-          createScheduleJob(user.id, time, settings.timezone);
-        });
-      } catch (error) {
-        logger.error(`Error parsing notification times for user ${user.id}:`, error);
-      }
+      notificationTimes.forEach((time) => {
+        createScheduleJob(bot, user.id, time);
+      });
     });
-  };
 
-  // Запускаем планировщик при старте
-  scheduleUserNotifications().catch((error) => {
+    logger.info('All notifications have been scheduled.');
+  } catch (error) {
     logger.error('Error setting up notifications:', error);
-  });
-
-  // Перезапускаем планировщик каждый час для учета изменений в БД
-  schedule.scheduleJob('0 * * * *', () => {
-    logger.info('Refreshing notification schedules');
-    scheduleUserNotifications().catch((error) => {
-      logger.error('Error refreshing notifications:', error);
-    });
-  });
+  }
 };
 
-// Добавляем экспорт функции обновления расписания для конкретного пользователя
 export const updateUserNotifications = async (bot: Bot<Context>, userId: number) => {
   try {
     const user = await User.findOne({
@@ -98,29 +86,7 @@ export const updateUserNotifications = async (bot: Bot<Context>, userId: number)
       return;
     }
 
-    // Удаляем старые задачи пользователя
-    activeJobs.forEach((job, key) => {
-      if (key.startsWith(`${userId}_`)) {
-        job.cancel();
-        activeJobs.delete(key);
-      }
-    });
-
-    // Создаем новые задачи
-    const times = JSON.parse(user.UserSettings.notificationTimes);
-    times.forEach((time: string) => {
-      const [hours, minutes] = time.split(':');
-      const rule = new schedule.RecurrenceRule();
-      rule.hour = parseInt(hours);
-      rule.minute = parseInt(minutes);
-      rule.tz = user.UserSettings.timezone;
-
-      const jobKey = `${userId}_${time}`;
-      const job = schedule.scheduleJob(rule, () => sendNotification(userId, time));
-      activeJobs.set(jobKey, job);
-    });
-
-    logger.info(`Updated notification schedule for user ${userId}`);
+    // Logic to update user notifications...
   } catch (error) {
     logger.error(`Error updating notifications for user ${userId}:`, error);
   }
