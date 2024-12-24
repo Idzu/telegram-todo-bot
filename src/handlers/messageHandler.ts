@@ -4,6 +4,7 @@ import { editCategoryState } from '../state/editCategoryState';
 import { handleTodayTaskInput, handleTomorrowTaskInput, handleFutureTaskInput, addFutureTask, handleRecurringTaskInput } from '../commands/task/addTask';
 import { handleTextInputForEdit } from '../commands/category/editCategory';
 import logger from '../utils/logger';
+import { notificationState } from '../state/notificationState';
 
 export const handleMessage = async (ctx: Context) => {
   const userId = ctx.from?.id;
@@ -12,6 +13,10 @@ export const handleMessage = async (ctx: Context) => {
   // Проверяем состояния
   const taskStatus = taskState.get(userId);
   const categoryStatus = editCategoryState.has(userId);
+  const notificationStatus = notificationState.get(userId);
+
+  // Если идет процесс изменения уведомлений, пропускаем обработку
+  if (notificationStatus) return;
 
   try {
     if (!ctx.message?.text) return;

@@ -2,6 +2,8 @@ import { Bot, Context } from 'grammy';
 import 'dotenv/config';
 import logger from './utils/logger';
 import db from './utils/db';
+import { setupNotifications } from './services/notificationService';
+import { notificationState } from './state/notificationState';
 
 // Tasks
 import { addFutureTask, addTaskCommand, addTodayTask, addTomorrowTask, addRecurringTask } from './commands/task/addTask';
@@ -20,15 +22,46 @@ import { keyboardCommands } from './keyboards/mainKeyboard';
 import { taskKeyboardsComands } from './keyboards/taskKeyboard';
 import { handleMessage } from './handlers/messageHandler';
 import { handleBackButton } from './handlers/backHandler';
+import { handleNotificationTimeUpdate } from './commands/settings';
 
 // Settings bot
 const bot = new Bot(process.env.BOT_TOKEN!);
 
+// Настраиваем уведомления
+setupNotifications(bot);
+
 // Register commands
-// Basic command start
 bot.command('start', outputStartText);
 bot.hears(keyboardCommands.settings, outputSettingsText);
-// Tasks
+
+// Обработка callback-запросов для настроек
+bot.callbackQuery('change_notifications', async (ctx) => {
+  if (!ctx.from) return;
+
+  notificationState.set(ctx.from.id, true);
+  await ctx.reply('Введите время для уведомлений в формате HH:MM через запятую\nНапример: 09:00, 12:00, 15:00, 17:00');
+  await ctx.answerCallbackQuery();
+});
+
+// Обработка ввода нового времени (должна быть перед общим обработчиком)
+bot.on('message:text', async (ctx) => {
+  if (!ctx.from) return;
+
+  // Проверяем состояние
+  if (notificationState.get(ctx.from.id) && ctx.message.text.includes(':')) {
+    try {
+      await handleNotificationTimeUpdate(ctx, bot);
+      notificationState.delete(ctx.from.id);
+      logger.info(`Successfully updated notifications for user ${ctx.from.id}`);
+    } catch (error) {
+      logger.error('Error in notification update:', error);
+      await ctx.reply('Произошла ошибка при обновлении времени уведомлений');
+    }
+    return;
+  }
+});
+
+// Tasks commands
 bot.hears(keyboardCommands.addTask, addTaskCommand);
 bot.hears(taskKeyboardsComands.addTodayTask, addTodayTask);
 bot.hears(taskKeyboardsComands.addTomorrowTask, addTomorrowTask);
@@ -36,13 +69,14 @@ bot.hears(taskKeyboardsComands.addFutureTask, (ctx) => addFutureTask(ctx, ''));
 bot.hears(taskKeyboardsComands.addRecurringTask, addRecurringTask);
 bot.hears(taskKeyboardsComands.back, handleBackButton);
 bot.hears(keyboardCommands.tasks, tasksCommand);
-// Category
+
+// Category commands
 bot.command('addcategory', addCategoryCommand);
 bot.command('listcategory', listCategories);
 bot.callbackQuery(/delete_\d+/, deleteUserCategory);
 bot.callbackQuery(/edit_\d+/, editUserCategory);
 
-// Обработка текстового ввода
+// Общий обработчик сообщений (должен быть последним)
 bot.on('message', handleMessage);
 
 // Bot error message

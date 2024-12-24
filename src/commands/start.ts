@@ -1,6 +1,7 @@
 import { Context } from 'grammy';
 import { renderMainKeyboard } from '../keyboards/mainKeyboard';
 import User from '../models/user';
+import UserSettings from '../models/userSettings';
 import logger from '../utils/logger';
 
 /**
@@ -19,6 +20,14 @@ export const outputStartText = async (ctx: Context) => {
       where: { id: ctx.from.id },
       defaults: {
         name: ctx.from.first_name || 'Unknown',
+      },
+    });
+
+    const [userSettings] = await UserSettings.findOrCreate({
+      where: { userId: user.id },
+      defaults: {
+        timezone: 'UTC+4',
+        notificationTimes: JSON.stringify(['09:00', '12:00', '15:00', '17:00']),
       },
     });
 
