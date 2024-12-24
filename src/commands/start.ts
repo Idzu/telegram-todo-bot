@@ -1,5 +1,7 @@
 import { Context } from 'grammy';
 import { renderMainKeyboard } from '../keyboards/mainKeyboard';
+import User from '../models/user';
+import logger from '../utils/logger';
 
 /**
  * Вывод при вызове команды старт
@@ -7,7 +9,27 @@ import { renderMainKeyboard } from '../keyboards/mainKeyboard';
  * @returns
  */
 export const outputStartText = async (ctx: Context) => {
-  const keyboard = await renderMainKeyboard();
+  try {
+    if (!ctx.from) {
+      return ctx.reply('Unable to identify the user.');
+    }
 
-  return ctx.reply('👋 Welcome to the Task Manager Bot!\n\nUse /help to see available commands.', { reply_markup: keyboard });
+    // Создать пользоваетеля или проверить еслть ли он
+    const [user] = await User.findOrCreate({
+      where: { id: ctx.from.id },
+      defaults: {
+        name: ctx.from.first_name || 'Unknown',
+      },
+    });
+
+    logger.info(`User ${ctx.from.first_name} (${user.id}) started the bot`);
+    const keyboard = await renderMainKeyboard();
+
+    return ctx.reply('👋 Welcome to the Task Manager Bot!\n\nUse /help to see available commands.', {
+      reply_markup: keyboard,
+    });
+  } catch (error) {
+    logger.error('Error in start command:', error);
+    return ctx.reply('Error occurred while starting the bot');
+  }
 };

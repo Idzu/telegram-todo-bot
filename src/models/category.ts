@@ -1,5 +1,6 @@
 import { DataTypes, Model } from 'sequelize';
 import db from '../utils/db';
+import User from './user';
 
 class Category extends Model {
   declare id: number;
@@ -21,6 +22,10 @@ Category.init(
     userId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: User,
+        key: 'id',
+      },
     },
   },
   {
@@ -28,5 +33,8 @@ Category.init(
     modelName: 'Category',
   },
 );
+
+Category.belongsTo(User, { foreignKey: 'userId' });
+User.hasMany(Category, { foreignKey: 'userId' });
 
 export default Category;

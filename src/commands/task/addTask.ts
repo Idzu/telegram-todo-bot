@@ -28,7 +28,15 @@ export const addTodayTask = async (ctx: Context) => {
     if (!ctx.from) {
       return ctx.reply('Unable to identify the user.');
     }
-    await ctx.reply('Введите текст задачи на сегодня:');
+
+    const categories = await getCategoriesForUser(ctx.from.id);
+
+    const inlineKeyboard = new InlineKeyboard();
+    categories.forEach((category) => {
+      inlineKeyboard.text(category.name, `noop`);
+    });
+
+    await ctx.reply('Введите текст задачи на сегодня и выберите категорию:', { reply_markup: inlineKeyboard });
     taskState.set(ctx.from.id, 'waitingTodayTask');
   } catch (error) {
     logger.error('Error in addTodayTask:', error);
