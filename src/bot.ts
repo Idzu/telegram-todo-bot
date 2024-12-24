@@ -43,24 +43,6 @@ bot.callbackQuery('change_notifications', async (ctx) => {
   await ctx.answerCallbackQuery();
 });
 
-// Обработка ввода нового времени (должна быть перед общим обработчиком)
-bot.on('message:text', async (ctx) => {
-  if (!ctx.from) return;
-
-  // Проверяем состояние
-  if (notificationState.get(ctx.from.id) && ctx.message.text.includes(':')) {
-    try {
-      await handleNotificationTimeUpdate(ctx, bot);
-      notificationState.delete(ctx.from.id);
-      logger.info(`Successfully updated notifications for user ${ctx.from.id}`);
-    } catch (error) {
-      logger.error('Error in notification update:', error);
-      await ctx.reply('Произошла ошибка при обновлении времени уведомлений');
-    }
-    return;
-  }
-});
-
 // Tasks commands
 bot.hears(keyboardCommands.addTask, addTaskCommand);
 bot.hears(taskKeyboardsComands.addTodayTask, addTodayTask);
@@ -77,7 +59,21 @@ bot.callbackQuery(/delete_\d+/, deleteUserCategory);
 bot.callbackQuery(/edit_\d+/, editUserCategory);
 
 // Общий обработчик сообщений (должен быть последним)
-bot.on('message', handleMessage);
+bot.on('message', async (ctx) => {
+  handleMessage(ctx);
+
+  if (ctx.message.text && notificationState.get(ctx.from.id) && ctx.message.text.includes(':')) {
+    try {
+      await handleNotificationTimeUpdate(ctx, bot);
+      notificationState.delete(ctx.from.id);
+      logger.info(`Successfully updated notifications for user ${ctx.from.id}`);
+    } catch (error) {
+      logger.error('Error in notification update:', error);
+      await ctx.reply('Произошла ошибка при обновлении времени уведомлений');
+    }
+    return;
+  }
+});
 
 // Bot error message
 bot.catch((err) => {
