@@ -10,7 +10,7 @@ import UserSettings from '../models/userSettings';
 const activeJobs = new Map<string, schedule.Job>();
 
 // Статичное время для уведомлений (UTC+4)
-const notificationTimes = ['09:00', '12:00', '15:00', '17:00'];
+const notificationTimes = ['08:00', '11:00', '14:00', '16:00'];
 
 // Функция для отправки уведомления
 const sendNotification = async (bot: Bot<Context>, userId: number, time: string): Promise<void> => {

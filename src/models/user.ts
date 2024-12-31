@@ -4,6 +4,7 @@ import db from '../utils/db';
 class User extends Model {
   declare id: number;
   declare name: string;
+  declare UserSettings: string;
 }
 
 User.init(
